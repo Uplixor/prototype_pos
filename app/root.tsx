@@ -46,12 +46,12 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
+  let message = "Something went wrong";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "Page not found" : "Error";
     details =
       error.status === 404
         ? "The requested page could not be found."
@@ -62,14 +62,14 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+    <main className="flex min-h-dvh flex-col items-center justify-center gap-2 bg-background px-4 text-center">
+      <h1 className="text-base font-semibold text-foreground">{message}</h1>
+      <p className="max-w-md text-sm text-muted-foreground">{details}</p>
+      {stack ? (
+        <pre className="mt-4 w-full max-w-2xl overflow-x-auto rounded-md border border-border bg-card p-4 text-left text-xs">
           <code>{stack}</code>
         </pre>
-      )}
+      ) : null}
     </main>
   );
 }
