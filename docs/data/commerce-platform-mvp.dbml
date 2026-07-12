@@ -1,0 +1,778 @@
+// Commerce Operating Platform — MVP business data model
+// Paste this file into https://dbdiagram.io
+// This is an implementation-neutral DBML model. PostgreSQL and Prisma
+// implementation must preserve the invariants documented in docs/data/.
+// This is reviewed before, and is not generated from, the Prisma schema.
+
+Enum organization_status {
+  active
+  suspended
+  archived
+}
+
+Enum branch_status {
+  active
+  archived
+}
+
+Enum user_status {
+  active
+  suspended
+}
+
+Enum record_status {
+  active
+  archived
+}
+
+Enum stock_count_status {
+  draft
+  submitted
+  approved
+  cancelled
+}
+
+Enum stock_transfer_status {
+  draft
+  dispatched
+  received
+  cancelled
+}
+
+Enum inventory_location_status {
+  active
+  archived
+}
+
+Enum product_type {
+  physical
+  service
+  digital
+  voucher
+  gift_card
+}
+
+Enum membership_status {
+  active
+  suspended
+  revoked
+}
+
+Enum capability_status {
+  enabled
+  suspended
+  disabled
+}
+
+Enum product_status {
+  draft
+  active
+  archived
+}
+
+Enum sale_status {
+  open
+  awaiting_payment
+  completed
+  cancelled
+}
+
+Enum payment_status {
+  initiated
+  pending
+  recorded
+  failed
+  refunded
+}
+
+Enum purchase_status {
+  draft
+  ordered
+  partially_received
+  received
+  cancelled
+}
+
+Enum stock_movement_type {
+  goods_receipt
+  sale_consumption
+  adjustment
+  transfer_out
+  transfer_in
+  stock_count_reconciliation
+  return_in
+  return_out
+}
+
+Enum audit_action {
+  created
+  updated
+  archived
+  completed
+  cancelled
+  refunded
+  adjusted
+  enabled
+  disabled
+}
+
+Table organizations {
+  id uuid [pk]
+  name varchar [not null]
+  legal_name varchar
+  default_currency char(3) [not null]
+  timezone varchar [not null]
+  status organization_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (name)
+  }
+}
+
+Table branches {
+  id uuid [pk]
+  organization_id uuid [not null]
+  name varchar [not null]
+  code varchar
+  timezone varchar [not null]
+  address_json jsonb
+  status branch_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (organization_id, name) [unique]
+    (organization_id, code) [unique]
+  }
+}
+
+Table users {
+  id uuid [pk]
+  email varchar [not null, unique]
+  display_name varchar [not null]
+  status user_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table organization_memberships {
+  id uuid [pk]
+  organization_id uuid [not null]
+  user_id uuid [not null]
+  status membership_status [not null]
+  joined_at timestamp [not null]
+  revoked_at timestamp
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Indexes {
+    (organization_id, user_id) [unique]
+  }
+}
+
+Table roles {
+  id uuid [pk]
+  organization_id uuid [not null]
+  name varchar [not null]
+  description varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Indexes {
+    (organization_id, name) [unique]
+  }
+}
+
+Table permissions {
+  id uuid [pk]
+  code varchar [not null, unique, note: 'Examples: sale.create, inventory.adjust']
+  description varchar [not null]
+}
+
+Table role_permissions {
+  role_id uuid [not null]
+  permission_id uuid [not null]
+  created_at timestamp [not null]
+
+  Indexes {
+    (role_id, permission_id) [pk]
+  }
+}
+
+Table membership_roles {
+  membership_id uuid [not null]
+  role_id uuid [not null]
+  branch_id uuid [note: 'Null means the role applies to all branches in the Organization']
+  created_at timestamp [not null]
+
+  Indexes {
+    (membership_id, role_id, branch_id) [unique]
+  }
+}
+
+Table capabilities {
+  id uuid [pk]
+  code varchar [not null, unique]
+  name varchar [not null]
+  classification varchar [not null, note: 'core or optional']
+}
+
+Table organization_capabilities {
+  id uuid [pk]
+  organization_id uuid [not null]
+  capability_id uuid [not null]
+  status capability_status [not null]
+  configuration_json jsonb
+  enabled_by_membership_id uuid
+  enabled_at timestamp
+  disabled_at timestamp
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Indexes {
+    (organization_id, capability_id) [unique]
+  }
+}
+
+Table categories {
+  id uuid [pk]
+  organization_id uuid [not null]
+  name varchar [not null]
+  status record_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (organization_id, name) [unique]
+  }
+}
+
+Table products {
+  id uuid [pk]
+  organization_id uuid [not null]
+  category_id uuid
+  name varchar [not null]
+  product_type product_type [not null, default: 'physical']
+  base_unit_id uuid [not null]
+  sku varchar
+  barcode varchar
+  status product_status [not null]
+  track_inventory boolean [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (organization_id, sku) [unique]
+    (organization_id, barcode) [unique]
+    (organization_id, name)
+  }
+}
+
+Table units {
+  id uuid [pk]
+  organization_id uuid [note: 'Null only for platform-provided canonical units']
+  code varchar [not null, note: 'Examples: piece, kg, gram, litre, bottle, box']
+  name varchar [not null]
+  decimal_precision integer [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Indexes {
+    (organization_id, code) [unique]
+  }
+}
+
+Table product_units {
+  id uuid [pk]
+  product_id uuid [not null]
+  unit_id uuid [not null]
+  conversion_to_base decimal(19,6) [not null]
+  is_sale_unit boolean [not null]
+  is_purchase_unit boolean [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Note: 'Conversion is defined only within one Product and its declared base unit.'
+  Indexes {
+    (product_id, unit_id) [unique]
+  }
+}
+
+Table tax_profiles {
+  id uuid [pk]
+  organization_id uuid [not null]
+  name varchar [not null]
+  status record_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (organization_id, name) [unique]
+  }
+}
+
+Table tax_rates {
+  id uuid [pk]
+  tax_profile_id uuid [not null]
+  name varchar [not null]
+  rate decimal(9,6) [not null]
+  effective_from timestamp [not null]
+  effective_to timestamp
+  created_at timestamp [not null]
+
+  Note: 'Effective tax-rate intervals for one profile must not overlap.'
+}
+
+Table product_tax_profiles {
+  product_id uuid [not null]
+  tax_profile_id uuid [not null]
+  created_at timestamp [not null]
+
+  Indexes {
+    (product_id, tax_profile_id) [pk]
+  }
+}
+
+Table product_variants {
+  id uuid [pk]
+  product_id uuid [not null]
+  name varchar [not null]
+  sku varchar
+  barcode varchar
+  status product_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (product_id, name) [unique]
+  }
+}
+
+Table product_prices {
+  id uuid [pk]
+  organization_id uuid [not null]
+  product_id uuid [not null]
+  variant_id uuid
+  branch_id uuid [note: 'Null means organization-wide price']
+  currency char(3) [not null]
+  amount decimal(19,4) [not null]
+  effective_from timestamp [not null]
+  effective_to timestamp
+  created_at timestamp [not null]
+
+  Note: 'Price intervals for the same product, variant, branch, and currency must not overlap.'
+}
+
+Table product_branch_availability {
+  product_id uuid [not null]
+  branch_id uuid [not null]
+  is_available boolean [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Indexes {
+    (product_id, branch_id) [pk]
+  }
+}
+
+Table customers {
+  id uuid [pk]
+  organization_id uuid [not null]
+  display_name varchar [not null]
+  first_name varchar
+  last_name varchar
+  email varchar
+  phone varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (organization_id, phone)
+    (organization_id, email)
+  }
+}
+
+Table sales {
+  id uuid [pk]
+  organization_id uuid [not null]
+  branch_id uuid [not null]
+  sale_number varchar [not null]
+  receipt_number varchar
+  customer_id uuid
+  created_by_membership_id uuid [not null]
+  updated_by_membership_id uuid
+  status sale_status [not null]
+  currency char(3) [not null]
+  subtotal_amount decimal(19,4) [not null]
+  discount_amount decimal(19,4) [not null, default: 0]
+  tax_amount decimal(19,4) [not null, default: 0]
+  total_amount decimal(19,4) [not null]
+  completed_at timestamp
+  cancelled_at timestamp
+  cancellation_reason varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Note: 'Completed sales are immutable. Corrections create payment refunds, returns, or other linked facts.'
+  Indexes {
+    (organization_id, sale_number) [unique]
+    (organization_id, receipt_number) [unique]
+    (organization_id, branch_id, created_at)
+    (organization_id, status, created_at)
+  }
+}
+
+Table sale_items {
+  id uuid [pk]
+  sale_id uuid [not null]
+  product_id uuid [not null]
+  variant_id uuid
+  product_name_snapshot varchar [not null]
+  variant_name_snapshot varchar
+  sku_snapshot varchar
+  quantity decimal(19,4) [not null]
+  unit_price_amount decimal(19,4) [not null]
+  discount_amount decimal(19,4) [not null, default: 0]
+  tax_amount decimal(19,4) [not null, default: 0]
+  tax_snapshot_json jsonb [note: 'Applied profile, rates, names, and calculation basis']
+  line_total_amount decimal(19,4) [not null]
+  created_at timestamp [not null]
+
+  Note: 'Snapshots remain unchanged after sale completion.'
+}
+
+Table payments {
+  id uuid [pk]
+  organization_id uuid [not null]
+  branch_id uuid [not null]
+  sale_id uuid [not null]
+  recorded_by_membership_id uuid [not null]
+  method varchar [not null]
+  provider varchar
+  provider_reference varchar
+  idempotency_key varchar [not null]
+  status payment_status [not null]
+  currency char(3) [not null]
+  amount decimal(19,4) [not null]
+  recorded_at timestamp
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Note: 'Recorded payments are immutable. Provider reference uniqueness is enforced per provider and organization.'
+  Indexes {
+    (organization_id, idempotency_key) [unique]
+    (organization_id, provider, provider_reference) [unique]
+    (sale_id, status)
+  }
+}
+
+Table refunds {
+  id uuid [pk]
+  organization_id uuid [not null]
+  sale_id uuid [not null]
+  payment_id uuid [not null]
+  refunded_by_membership_id uuid [not null]
+  idempotency_key varchar [not null]
+  currency char(3) [not null]
+  amount decimal(19,4) [not null]
+  reason varchar [not null]
+  recorded_at timestamp [not null]
+  created_at timestamp [not null]
+
+  Note: 'A refund is a new immutable transaction. Sum of refunds cannot exceed payment amount.'
+  Indexes {
+    (organization_id, idempotency_key) [unique]
+    (payment_id, recorded_at)
+  }
+}
+
+Table suppliers {
+  id uuid [pk]
+  organization_id uuid [not null]
+  name varchar [not null]
+  phone varchar
+  email varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+
+  Indexes {
+    (organization_id, name) [unique]
+  }
+}
+
+Table purchases {
+  id uuid [pk]
+  organization_id uuid [not null]
+  branch_id uuid [not null]
+  purchase_number varchar [not null]
+  supplier_id uuid [not null]
+  status purchase_status [not null]
+  currency char(3) [not null]
+  ordered_at timestamp
+  created_by_membership_id uuid [not null]
+  updated_by_membership_id uuid
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Note: 'Creating a purchase never changes stock.'
+  Indexes {
+    (organization_id, purchase_number) [unique]
+  }
+}
+
+Table purchase_items {
+  id uuid [pk]
+  purchase_id uuid [not null]
+  product_id uuid [not null]
+  variant_id uuid
+  ordered_quantity decimal(19,4) [not null]
+  expected_unit_cost_amount decimal(19,4)
+  created_at timestamp [not null]
+}
+
+Table goods_receipts {
+  id uuid [pk]
+  organization_id uuid [not null]
+  branch_id uuid [not null]
+  purchase_id uuid [not null]
+  received_by_membership_id uuid [not null]
+  received_at timestamp [not null]
+  created_at timestamp [not null]
+
+  Note: 'Only confirmed receipt items create inbound stock movements.'
+}
+
+Table goods_receipt_items {
+  id uuid [pk]
+  goods_receipt_id uuid [not null]
+  purchase_item_id uuid [not null]
+  received_quantity decimal(19,4) [not null]
+  unit_cost_amount decimal(19,4)
+  created_at timestamp [not null]
+}
+
+Table inventory_locations {
+  id uuid [pk]
+  organization_id uuid [not null]
+  branch_id uuid [not null]
+  name varchar [not null]
+  status inventory_location_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Indexes {
+    (organization_id, branch_id, name) [unique]
+  }
+}
+
+Table stock_movements {
+  id uuid [pk]
+  organization_id uuid [not null]
+  inventory_location_id uuid [not null]
+  product_id uuid [not null]
+  variant_id uuid
+  movement_type stock_movement_type [not null]
+  quantity_delta decimal(19,4) [not null, note: 'Positive inbound; negative outbound']
+  occurred_at timestamp [not null]
+  recorded_by_membership_id uuid [not null]
+  sale_id uuid
+  goods_receipt_item_id uuid
+  transfer_id uuid
+  stock_count_id uuid
+  adjustment_reason varchar
+  created_at timestamp [not null]
+
+  Note: 'Append-only. Exactly one accountable cause is required by movement type.'
+  Indexes {
+    (organization_id, inventory_location_id, product_id, occurred_at)
+    (sale_id)
+    (goods_receipt_item_id)
+  }
+}
+
+Table stock_counts {
+  id uuid [pk]
+  organization_id uuid [not null]
+  inventory_location_id uuid [not null]
+  counted_by_membership_id uuid [not null]
+  status stock_count_status [not null]
+  counted_at timestamp
+  approved_at timestamp
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table stock_count_items {
+  id uuid [pk]
+  stock_count_id uuid [not null]
+  product_id uuid [not null]
+  variant_id uuid
+  counted_quantity decimal(19,4) [not null]
+  created_at timestamp [not null]
+}
+
+Table stock_transfers {
+  id uuid [pk]
+  organization_id uuid [not null]
+  origin_location_id uuid [not null]
+  destination_location_id uuid [not null]
+  transfer_number varchar [not null]
+  created_by_membership_id uuid [not null]
+  status stock_transfer_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  Note: 'Origin and destination must differ and belong to the same Organization.'
+  Indexes {
+    (organization_id, transfer_number) [unique]
+  }
+}
+
+Table audit_records {
+  id uuid [pk]
+  organization_id uuid [not null]
+  branch_id uuid
+  actor_membership_id uuid
+  action audit_action [not null]
+  aggregate_type varchar [not null]
+  aggregate_id uuid [not null]
+  outcome_json jsonb
+  occurred_at timestamp [not null]
+
+  Note: 'Append-only audit history.'
+  Indexes {
+    (organization_id, aggregate_type, aggregate_id, occurred_at)
+  }
+}
+
+Table domain_events {
+  id uuid [pk]
+  organization_id uuid [not null]
+  aggregate_type varchar [not null]
+  aggregate_id uuid [not null]
+  event_name varchar [not null]
+  event_version integer [not null]
+  payload_json jsonb [not null]
+  occurred_at timestamp [not null]
+  published_at timestamp
+
+  Indexes {
+    (organization_id, aggregate_type, aggregate_id, occurred_at)
+  }
+}
+
+Table idempotency_records {
+  id uuid [pk]
+  organization_id uuid [not null]
+  membership_id uuid
+  operation varchar [not null]
+  idempotency_key varchar [not null]
+  outcome_status varchar [not null]
+  outcome_reference_id uuid
+  created_at timestamp [not null]
+  expires_at timestamp
+
+  Indexes {
+    (organization_id, membership_id, operation, idempotency_key) [unique]
+  }
+}
+
+Ref: branches.organization_id > organizations.id
+Ref: organization_memberships.organization_id > organizations.id
+Ref: organization_memberships.user_id > users.id
+Ref: roles.organization_id > organizations.id
+Ref: role_permissions.role_id > roles.id
+Ref: role_permissions.permission_id > permissions.id
+Ref: membership_roles.membership_id > organization_memberships.id
+Ref: membership_roles.role_id > roles.id
+Ref: membership_roles.branch_id > branches.id
+Ref: organization_capabilities.organization_id > organizations.id
+Ref: organization_capabilities.capability_id > capabilities.id
+Ref: organization_capabilities.enabled_by_membership_id > organization_memberships.id
+Ref: categories.organization_id > organizations.id
+Ref: products.organization_id > organizations.id
+Ref: products.category_id > categories.id
+Ref: products.base_unit_id > units.id
+Ref: units.organization_id > organizations.id
+Ref: product_units.product_id > products.id
+Ref: product_units.unit_id > units.id
+Ref: tax_profiles.organization_id > organizations.id
+Ref: tax_rates.tax_profile_id > tax_profiles.id
+Ref: product_tax_profiles.product_id > products.id
+Ref: product_tax_profiles.tax_profile_id > tax_profiles.id
+Ref: product_variants.product_id > products.id
+Ref: product_prices.organization_id > organizations.id
+Ref: product_prices.product_id > products.id
+Ref: product_prices.variant_id > product_variants.id
+Ref: product_prices.branch_id > branches.id
+Ref: product_branch_availability.product_id > products.id
+Ref: product_branch_availability.branch_id > branches.id
+Ref: customers.organization_id > organizations.id
+Ref: sales.organization_id > organizations.id
+Ref: sales.branch_id > branches.id
+Ref: sales.customer_id > customers.id
+Ref: sales.created_by_membership_id > organization_memberships.id
+Ref: sales.updated_by_membership_id > organization_memberships.id
+Ref: sale_items.sale_id > sales.id
+Ref: sale_items.product_id > products.id
+Ref: sale_items.variant_id > product_variants.id
+Ref: payments.organization_id > organizations.id
+Ref: payments.branch_id > branches.id
+Ref: payments.sale_id > sales.id
+Ref: payments.recorded_by_membership_id > organization_memberships.id
+Ref: refunds.organization_id > organizations.id
+Ref: refunds.sale_id > sales.id
+Ref: refunds.payment_id > payments.id
+Ref: refunds.refunded_by_membership_id > organization_memberships.id
+Ref: suppliers.organization_id > organizations.id
+Ref: purchases.organization_id > organizations.id
+Ref: purchases.branch_id > branches.id
+Ref: purchases.supplier_id > suppliers.id
+Ref: purchases.created_by_membership_id > organization_memberships.id
+Ref: purchases.updated_by_membership_id > organization_memberships.id
+Ref: purchase_items.purchase_id > purchases.id
+Ref: purchase_items.product_id > products.id
+Ref: purchase_items.variant_id > product_variants.id
+Ref: goods_receipts.organization_id > organizations.id
+Ref: goods_receipts.branch_id > branches.id
+Ref: goods_receipts.purchase_id > purchases.id
+Ref: goods_receipts.received_by_membership_id > organization_memberships.id
+Ref: goods_receipt_items.goods_receipt_id > goods_receipts.id
+Ref: goods_receipt_items.purchase_item_id > purchase_items.id
+Ref: inventory_locations.organization_id > organizations.id
+Ref: inventory_locations.branch_id > branches.id
+Ref: stock_movements.organization_id > organizations.id
+Ref: stock_movements.inventory_location_id > inventory_locations.id
+Ref: stock_movements.product_id > products.id
+Ref: stock_movements.variant_id > product_variants.id
+Ref: stock_movements.recorded_by_membership_id > organization_memberships.id
+Ref: stock_movements.sale_id > sales.id
+Ref: stock_movements.goods_receipt_item_id > goods_receipt_items.id
+Ref: stock_movements.transfer_id > stock_transfers.id
+Ref: stock_movements.stock_count_id > stock_counts.id
+Ref: stock_counts.organization_id > organizations.id
+Ref: stock_counts.inventory_location_id > inventory_locations.id
+Ref: stock_counts.counted_by_membership_id > organization_memberships.id
+Ref: stock_count_items.stock_count_id > stock_counts.id
+Ref: stock_count_items.product_id > products.id
+Ref: stock_count_items.variant_id > product_variants.id
+Ref: stock_transfers.organization_id > organizations.id
+Ref: stock_transfers.origin_location_id > inventory_locations.id
+Ref: stock_transfers.destination_location_id > inventory_locations.id
+Ref: stock_transfers.created_by_membership_id > organization_memberships.id
+Ref: audit_records.organization_id > organizations.id
+Ref: audit_records.branch_id > branches.id
+Ref: audit_records.actor_membership_id > organization_memberships.id
+Ref: domain_events.organization_id > organizations.id
+Ref: idempotency_records.organization_id > organizations.id
+Ref: idempotency_records.membership_id > organization_memberships.id
