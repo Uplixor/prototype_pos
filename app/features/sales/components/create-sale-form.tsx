@@ -23,6 +23,7 @@ import {
 } from "~/shared/components/form/form";
 import { Button } from "~/shared/components/ui/button";
 import { Input } from "~/shared/components/ui/input";
+import { Label } from "~/shared/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -109,7 +110,7 @@ function CreateSaleForm({ drawerId }: CreateSaleFormProps) {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <FormLabel>Line items</FormLabel>
+              <Label>Line items</Label>
               <Button
                 type="button"
                 variant="outline"
