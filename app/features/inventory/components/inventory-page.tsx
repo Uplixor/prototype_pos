@@ -64,7 +64,7 @@ function InventoryPage() {
     <div className="flex min-h-full flex-col">
       <PageHeader
         title="Inventory"
-        description={`Append-only stock accountability · Branch ${branch.code}`}
+        description="Manage and monitor inventory levels across all warehouse locations."
         actions={
           <PermissionGuard permissions={["inventory:write"]}>
             <Button type="button" size="sm" onClick={() => openAdjustment()}>
@@ -132,7 +132,7 @@ function InventoryPage() {
         </p>
       </FilterBar>
 
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border bg-card">
+      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border bg-card">
         <InventoryTable
           balances={filtered}
           isLoading={balancesQuery.isLoading}

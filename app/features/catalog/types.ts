@@ -25,6 +25,8 @@ export type Product = {
   taxProfile: string;
   trackInventory: boolean;
   branchIds: string[];
+  /** Optional product image URL — missing image never blocks sell/identify */
+  imageUrl?: string;
   updatedAt: string;
   createdAt: string;
 };

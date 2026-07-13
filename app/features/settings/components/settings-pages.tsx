@@ -124,8 +124,8 @@ export function BranchesSettingsPage() {
           </PermissionGuard>
         }
       />
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border">
-        <table className="w-full text-sm">
+      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+        <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
               <th className="px-3 py-2 text-left font-medium">Name</th>
@@ -207,8 +207,8 @@ export function UsersSettingsPage() {
   return (
     <div className="flex min-h-full flex-col">
       <PageHeader
-        title="Users & Roles"
-        description="Memberships are Organization-scoped; permissions enforce access"
+        title="Users"
+        description="Organization memberships — assign a role; permissions come from the role grant matrix"
         actions={
           <PermissionGuard permissions={["settings:write"]}>
             <Button type="button" size="sm" onClick={() => setOpen(true)}>
@@ -218,8 +218,8 @@ export function UsersSettingsPage() {
           </PermissionGuard>
         }
       />
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border">
-        <table className="w-full text-sm">
+      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+        <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
               <th className="px-3 py-2 text-left font-medium">User</th>

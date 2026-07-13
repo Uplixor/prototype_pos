@@ -25,7 +25,8 @@ export type UserRole =
   | "manager"
   | "cashier"
   | "inventory"
-  | "viewer";
+  | "viewer"
+  | "platform";
 
 export type AppUser = {
   id: string;
@@ -43,7 +44,15 @@ export type WorkspaceContextValue = {
   enabledCapabilities: CapabilityId[];
   permissions: readonly string[];
   isOnline: boolean;
+  isAuthenticated: boolean;
+  homePath: string;
   setOrganization: (organization: Organization) => void;
   setBranch: (branch: Branch) => void;
   setWorkspace: (workspace: Workspace) => void;
+  /** Apply a demo role preset (tenant roles or SaaS platform owner). */
+  assumeRole: (
+    roleId: "owner" | "manager" | "cashier" | "inventory" | "platform",
+  ) => void;
+  signOut: () => void;
+  hasPermission: (permission: string) => boolean;
 };

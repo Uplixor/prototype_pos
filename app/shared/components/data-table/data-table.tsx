@@ -58,7 +58,7 @@ export type DataTableProps<TData> = {
 };
 
 const densityRowClass: Record<Density, string> = {
-  compact: "h-8",
+  compact: "h-9",
   comfortable: "h-10",
   spacious: "h-12",
 };
@@ -85,7 +85,7 @@ function DataTable<TData>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [globalFilter, setGlobalFilter] = useState("");
-  const [densityInternal, setDensityInternal] = useState<Density>("comfortable");
+  const [densityInternal, setDensityInternal] = useState<Density>("compact");
 
   const density = densityProp ?? densityInternal;
   const setDensity = onDensityChange ?? setDensityInternal;
@@ -267,15 +267,15 @@ function DataTable<TData>({
         </div>
       </div>
 
-      <div className="relative overflow-auto border-b border-border">
-        <table className="w-full caption-bottom text-sm">
-          <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
+      <div className="relative overflow-x-auto overscroll-x-contain border-b border-border [-webkit-overflow-scrolling:touch]">
+        <table className="w-full min-w-[40rem] caption-bottom text-[13px]">
+          <thead className="sticky top-0 z-10 bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b border-border">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="h-9 px-3 text-left align-middle text-xs font-medium text-muted-foreground"
+                    className="h-9 px-3 text-left align-middle text-[12px] font-medium text-muted-foreground"
                     style={{ width: header.getSize() }}
                   >
                     {header.isPlaceholder ? null : (

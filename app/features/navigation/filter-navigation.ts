@@ -70,3 +70,14 @@ export function filterNavigation(
     })
     .filter((section): section is NavSection => section !== null);
 }
+
+/** Filter a flat nav item list (sidebar primary / module tabs). */
+export function filterNavItems(
+  items: NavItem[],
+  enabledCapabilities: CapabilityId[],
+  permissions: readonly string[],
+): NavItem[] {
+  return items
+    .map((item) => filterNavItem(item, enabledCapabilities, permissions))
+    .filter((item): item is NavItem => item !== null);
+}

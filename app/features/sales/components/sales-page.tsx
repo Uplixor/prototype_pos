@@ -61,7 +61,7 @@ function SalesPage() {
   return (
     <div className="flex min-h-full flex-col">
       <PageHeader
-        title="Sales"
+        title="Sales History"
         description={`${openCount} open · ${awaitingCount} awaiting payment · Branch ${branch.code}`}
         actions={
           <PermissionGuard permissions={["sales:write"]}>
@@ -113,7 +113,7 @@ function SalesPage() {
         </p>
       </FilterBar>
 
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border bg-card">
+      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border bg-card">
         <SalesTable
           sales={filtered}
           isLoading={salesQuery.isLoading}

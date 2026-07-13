@@ -47,6 +47,8 @@ let products: Product[] = [
     taxProfile: "Standard (8%)",
     trackInventory: true,
     branchIds: ["br_hq", "br_dt", "br_ml"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=400&h=400&fit=crop",
     createdAt: now,
     updatedAt: now,
   },
@@ -66,6 +68,8 @@ let products: Product[] = [
     taxProfile: "Standard (8%)",
     trackInventory: true,
     branchIds: ["br_hq", "br_dt"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=400&h=400&fit=crop",
     createdAt: now,
     updatedAt: now,
   },
@@ -85,6 +89,8 @@ let products: Product[] = [
     taxProfile: "Reduced (5%)",
     trackInventory: true,
     branchIds: ["br_hq", "br_dt", "br_ml"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=400&fit=crop",
     createdAt: now,
     updatedAt: now,
   },
@@ -104,6 +110,8 @@ let products: Product[] = [
     taxProfile: "Zero-rated",
     trackInventory: true,
     branchIds: ["br_hq"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=400&fit=crop",
     createdAt: now,
     updatedAt: now,
   },
@@ -142,6 +150,8 @@ let products: Product[] = [
     taxProfile: "Exempt",
     trackInventory: true,
     branchIds: ["br_hq"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop",
     createdAt: now,
     updatedAt: now,
   },
@@ -161,6 +171,8 @@ let products: Product[] = [
     taxProfile: "Standard (8%)",
     trackInventory: true,
     branchIds: ["br_dt"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1578314675249-a691d4f6c2d6?w=400&h=400&fit=crop",
     createdAt: now,
     updatedAt: now,
   },
@@ -180,6 +192,8 @@ let products: Product[] = [
     taxProfile: "Reduced (5%)",
     trackInventory: true,
     branchIds: ["br_hq", "br_ml"],
+    imageUrl:
+      "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop",
     createdAt: now,
     updatedAt: now,
   },

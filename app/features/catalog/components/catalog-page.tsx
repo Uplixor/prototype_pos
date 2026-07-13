@@ -60,8 +60,8 @@ function CatalogPage() {
   return (
     <div className="flex min-h-full flex-col">
       <PageHeader
-        title="Catalog"
-        description={`${activeCount} active · ${draftCount} draft · Organization-scoped products`}
+        title="Product Catalog"
+        description={`${activeCount} active · ${draftCount} draft · Filter by SKU, category, or status`}
         actions={
           <PermissionGuard permissions={["catalog:write"]}>
             <Button type="button" size="sm" onClick={openCreateProduct}>
@@ -113,7 +113,7 @@ function CatalogPage() {
         </p>
       </FilterBar>
 
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border bg-card">
+      <div className="mx-page mb-4 overflow-x-auto rounded-lg border border-border bg-card">
         <CatalogTable
           products={filtered}
           isLoading={productsQuery.isLoading}

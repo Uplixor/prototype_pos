@@ -68,8 +68,8 @@ function TransfersPage() {
           {(transfersQuery.data ?? []).length} transfers
         </p>
       </FilterBar>
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border">
-        <table className="w-full text-sm">
+      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+        <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
               <th className="px-3 py-2 text-left font-medium">Transfer</th>

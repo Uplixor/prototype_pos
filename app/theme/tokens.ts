@@ -1,6 +1,6 @@
 /**
- * Design tokens for the Commerce Operating Platform.
- * Values map to CSS custom properties in app.css — never hardcode in components.
+ * Design tokens — Precision Commerce (Stitch).
+ * Values map to CSS custom properties in app.css.
  */
 
 export const colors = {
@@ -16,6 +16,13 @@ export const colors = {
     inventory: "var(--color-chart-inventory)",
     returns: "var(--color-chart-returns)",
     expenses: "var(--color-chart-expenses)",
+    series: [
+      "var(--color-chart-revenue)",
+      "var(--color-chart-2)",
+      "var(--color-chart-3)",
+      "var(--color-chart-4)",
+      "var(--color-chart-profit)",
+    ],
   },
   status: {
     success: "var(--color-success)",
@@ -26,7 +33,6 @@ export const colors = {
 } as const;
 
 export const spacing = {
-  /** 8px base unit */
   unit: 8,
   page: "var(--spacing-page)",
   section: "var(--spacing-section)",
@@ -69,12 +75,12 @@ export const zIndex = {
 } as const;
 
 export const layout = {
-  sidebarWidth: 240,
+  sidebarWidth: 256,
   sidebarCollapsedWidth: 56,
   topbarHeight: 48,
   drawerWidth: {
     sm: 400,
     md: 520,
-    lg: 720,
+    lg: 640,
   },
 } as const;

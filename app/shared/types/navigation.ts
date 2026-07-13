@@ -17,6 +17,8 @@ export type NavItem = {
 export type NavSection = {
   id: string;
   label: string;
+  /** Section icon for collapsed rail / group header */
+  icon: LucideIcon;
   items: NavItem[];
   capabilities?: CapabilityId[];
 };

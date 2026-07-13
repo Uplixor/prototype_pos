@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { BRANCH_OPTIONS } from "~/features/catalog/data/catalog-store";
+import { ProductImage } from "~/features/catalog/components/product-image";
 import { useProductDrawer } from "~/features/catalog/hooks/use-product-drawer";
 import { PRODUCT_TYPE_LABELS } from "~/features/catalog/schema";
 import {
@@ -55,14 +56,22 @@ function CatalogTable({
         cell: ({ row }) => (
           <button
             type="button"
-            className="text-left"
+            className="flex items-center gap-3 text-left"
             onClick={() => openEditProduct(row.original)}
           >
-            <span className="block font-medium text-primary hover:underline">
-              {row.original.name}
-            </span>
-            <span className="block text-[11px] text-muted-foreground">
-              {row.original.sku}
+            <ProductImage
+              src={row.original.imageUrl}
+              alt={row.original.name}
+              size="sm"
+              className="shrink-0"
+            />
+            <span className="min-w-0">
+              <span className="block font-medium text-primary hover:underline">
+                {row.original.name}
+              </span>
+              <span className="block font-mono text-[11px] text-muted-foreground">
+                {row.original.sku}
+              </span>
             </span>
           </button>
         ),

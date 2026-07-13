@@ -1,37 +1,46 @@
 import {
+  Banknote,
   BarChart3,
   Boxes,
   Building2,
-  ClipboardList,
   ClipboardCheck,
+  ClipboardList,
+  FileInput,
   FolderTree,
   LayoutDashboard,
+  LineChart,
   Package,
+  PackageCheck,
+  PieChart,
   Ruler,
   Settings,
+  Shield,
   ShoppingCart,
+  SlidersHorizontal,
   Store,
   Tags,
   Truck,
   Users,
   Warehouse,
-  SlidersHorizontal,
 } from "lucide-react";
 import type { CommandAction, NavSection } from "~/shared/types";
 
 /**
- * MVP navigation per docs/product/05-mvp-product-design-brief.md
- * Role/capability filtering applied at render time.
+ * Full MVP navigation per docs/product/05-mvp-product-design-brief.md
+ * Stitch supplies visual chrome only — this tree is the product IA.
+ *
+ * Multi-item sections collapse into one group icon in the icon rail.
  */
 export const NAVIGATION_SECTIONS: NavSection[] = [
   {
     id: "overview",
     label: "Overview",
+    icon: LayoutDashboard,
     items: [
       {
         id: "dashboard",
         label: "Dashboard",
-        href: "/",
+        href: "/dashboard",
         icon: LayoutDashboard,
         permissions: ["dashboard:read"],
       },
@@ -47,6 +56,7 @@ export const NAVIGATION_SECTIONS: NavSection[] = [
   {
     id: "catalog",
     label: "Catalog",
+    icon: Package,
     items: [
       {
         id: "products",
@@ -81,6 +91,7 @@ export const NAVIGATION_SECTIONS: NavSection[] = [
   {
     id: "sales",
     label: "Sales",
+    icon: ClipboardList,
     items: [
       {
         id: "sales-history",
@@ -94,6 +105,7 @@ export const NAVIGATION_SECTIONS: NavSection[] = [
   {
     id: "inventory",
     label: "Inventory",
+    icon: Warehouse,
     items: [
       {
         id: "stock",
@@ -106,14 +118,14 @@ export const NAVIGATION_SECTIONS: NavSection[] = [
         id: "purchases",
         label: "Purchases",
         href: "/purchasing",
-        icon: ClipboardList,
+        icon: FileInput,
         permissions: ["purchasing:read"],
       },
       {
         id: "receipts",
         label: "Goods Receipts",
         href: "/purchasing/receipts",
-        icon: Package,
+        icon: PackageCheck,
         permissions: ["purchasing:read"],
       },
       {
@@ -149,33 +161,42 @@ export const NAVIGATION_SECTIONS: NavSection[] = [
   {
     id: "reports",
     label: "Reports",
+    icon: BarChart3,
     items: [
+      {
+        id: "reports-hub",
+        label: "Overview",
+        href: "/reports",
+        icon: PieChart,
+        permissions: ["reports:read"],
+      },
       {
         id: "report-sales",
         label: "Sales",
         href: "/reports/sales",
-        icon: BarChart3,
-        permissions: ["reports:read"],
+        icon: LineChart,
+        permissions: ["reports:sales"],
       },
       {
         id: "report-payments",
         label: "Payments",
         href: "/reports/payments",
-        icon: BarChart3,
-        permissions: ["reports:read"],
+        icon: Banknote,
+        permissions: ["reports:payments"],
       },
       {
         id: "report-inventory",
         label: "Inventory",
         href: "/reports/inventory",
-        icon: BarChart3,
-        permissions: ["reports:read"],
+        icon: Boxes,
+        permissions: ["reports:inventory"],
       },
     ],
   },
   {
     id: "settings",
     label: "Settings",
+    icon: Settings,
     items: [
       {
         id: "organization",
@@ -193,9 +214,16 @@ export const NAVIGATION_SECTIONS: NavSection[] = [
       },
       {
         id: "users",
-        label: "Users & Roles",
+        label: "Users",
         href: "/settings/users",
         icon: Users,
+        permissions: ["settings:read"],
+      },
+      {
+        id: "roles",
+        label: "Roles & Permissions",
+        href: "/settings/roles",
+        icon: Shield,
         permissions: ["settings:read"],
       },
     ],
@@ -207,7 +235,7 @@ export const COMMAND_ACTIONS: CommandAction[] = [
     id: "nav-dashboard",
     label: "Go to Dashboard",
     group: "Navigation",
-    href: "/",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -243,14 +271,14 @@ export const COMMAND_ACTIONS: CommandAction[] = [
     label: "Go to Purchases",
     group: "Navigation",
     href: "/purchasing",
-    icon: ClipboardList,
+    icon: FileInput,
   },
   {
     id: "nav-reports",
     label: "Go to Sales Report",
     group: "Navigation",
     href: "/reports/sales",
-    icon: BarChart3,
+    icon: LineChart,
   },
   {
     id: "nav-settings",
@@ -288,7 +316,7 @@ export const COMMAND_ACTIONS: CommandAction[] = [
     label: "New purchase",
     description: "Create purchase order",
     group: "Actions",
-    icon: ClipboardList,
+    icon: FileInput,
     permissions: ["purchasing:write"],
   },
 ];

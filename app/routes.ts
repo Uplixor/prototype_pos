@@ -2,9 +2,16 @@ import type { RouteConfig } from "@react-router/dev/routes";
 import { index, layout, route } from "@react-router/dev/routes";
 
 export default [
+  index("routes/landing.tsx"),
   route("login", "routes/login.tsx"),
+  layout("routes/platform-layout.tsx", [
+    route("platform", "routes/platform._index.tsx"),
+    route("platform/tenants", "routes/platform.tenants.tsx"),
+    route("platform/plans", "routes/platform.plans.tsx"),
+    route("platform/audit", "routes/platform.audit.tsx"),
+  ]),
   layout("routes/app-layout.tsx", [
-    index("routes/home.tsx"),
+    route("dashboard", "routes/dashboard.tsx"),
     route("pos", "routes/pos.tsx"),
     route("catalog", "routes/catalog.tsx"),
     route("catalog/categories", "routes/catalog.categories.tsx"),
@@ -25,5 +32,6 @@ export default [
     route("settings", "routes/settings.tsx"),
     route("settings/branches", "routes/settings.branches.tsx"),
     route("settings/users", "routes/settings.users.tsx"),
+    route("settings/roles", "routes/settings.roles.tsx"),
   ]),
 ] satisfies RouteConfig;

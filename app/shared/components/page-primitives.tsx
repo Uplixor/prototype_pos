@@ -20,18 +20,22 @@ function PageHeader({
   return (
     <header
       className={cn(
-        "flex flex-col gap-3 border-b border-border bg-card px-page py-3",
+        "flex flex-col gap-2 border-b border-border bg-card px-page py-4",
         className,
       )}
     >
-      {breadcrumbs ? <div className="text-xs text-muted-foreground">{breadcrumbs}</div> : null}
+      {breadcrumbs ? (
+        <div className="text-[12px] text-muted-foreground">{breadcrumbs}</div>
+      ) : null}
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 space-y-0.5">
-          <h1 className="truncate text-base font-semibold tracking-tight text-foreground">
+        <div className="min-w-0 space-y-1">
+          <h1 className="truncate text-[18px] font-semibold leading-6 tracking-tight text-heading">
             {title}
           </h1>
           {description ? (
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <p className="text-[12px] leading-[18px] text-muted-foreground">
+              {description}
+            </p>
           ) : null}
         </div>
         {actions ? (
@@ -98,19 +102,25 @@ function StatCard({
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-card px-4 py-3 shadow-none",
+        "rounded-lg border border-border bg-card px-4 py-3 shadow-none",
         className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        {Icon ? <Icon className="size-4 text-muted-foreground" aria-hidden /> : null}
+        <p className="text-[12px] font-medium tracking-wider text-muted-foreground uppercase">
+          {label}
+        </p>
+        {Icon ? (
+          <Icon className="size-4 text-muted-foreground" aria-hidden />
+        ) : null}
       </div>
-      <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums">{value}</p>
+      <p className="mt-1 font-money text-[18px] font-semibold tracking-tight text-heading">
+        {value}
+      </p>
       {delta ? (
         <p
           className={cn(
-            "mt-1 text-xs tabular-nums",
+            "mt-1 text-[11px] font-semibold tabular-nums",
             deltaTone === "positive" && "text-success",
             deltaTone === "negative" && "text-danger",
             deltaTone === "neutral" && "text-muted-foreground",
@@ -132,7 +142,7 @@ function MetricCard({ description, ...props }: MetricCardProps) {
     <div className="space-y-1">
       <StatCard {...props} />
       {description ? (
-        <p className="px-1 text-xs text-muted-foreground">{description}</p>
+        <p className="px-1 text-[12px] text-muted-foreground">{description}</p>
       ) : null}
     </div>
   );
@@ -162,14 +172,16 @@ function EmptyState({
       role="status"
     >
       {Icon ? (
-        <div className="flex size-10 items-center justify-center rounded-md border border-border bg-muted">
+        <div className="flex size-10 items-center justify-center rounded border border-border bg-muted">
           <Icon className="size-5 text-muted-foreground" aria-hidden />
         </div>
       ) : null}
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold">{title}</h3>
+        <h3 className="text-[14px] font-semibold text-heading">{title}</h3>
         {description ? (
-          <p className="max-w-sm text-xs text-muted-foreground">{description}</p>
+          <p className="max-w-sm text-[12px] text-muted-foreground">
+            {description}
+          </p>
         ) : null}
       </div>
       {action}
@@ -193,7 +205,7 @@ function LoadingState({ label = "Loading…", className }: LoadingStateProps) {
       aria-live="polite"
     >
       <div className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />
-      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-[12px] text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -220,8 +232,8 @@ function ErrorState({
       role="alert"
     >
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-danger">{title}</h3>
-        <p className="max-w-sm text-xs text-muted-foreground">{description}</p>
+        <h3 className="text-[14px] font-semibold text-danger">{title}</h3>
+        <p className="max-w-sm text-[12px] text-muted-foreground">{description}</p>
       </div>
       {onRetry ? (
         <Button type="button" variant="outline" size="sm" onClick={onRetry}>

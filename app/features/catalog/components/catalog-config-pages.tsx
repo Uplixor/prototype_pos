@@ -74,8 +74,8 @@ export function CategoriesPage() {
           </Button>
         </PermissionGuard>
       </div>
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border">
-        <table className="w-full text-sm">
+      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+        <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
               <th className="px-3 py-2 text-left font-medium">Name</th>
@@ -177,8 +177,8 @@ export function PricingPage() {
         title="Prices & Taxes"
         description="Price and tax changes apply to future sales only — completed Sale snapshots never change"
       />
-      <div className="mx-page mb-4 overflow-hidden rounded-md border border-border">
-        <table className="w-full text-sm">
+      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+        <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
               <th className="px-3 py-2 text-left font-medium">Product</th>
