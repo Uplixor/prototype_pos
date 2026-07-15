@@ -14,6 +14,8 @@ export type DrawerState = {
   title: string;
   description?: string;
   size?: DrawerSize;
+  /** When true, title/description chrome is hidden — content owns the header */
+  hideHeader?: boolean;
   content: ReactNode;
 };
 

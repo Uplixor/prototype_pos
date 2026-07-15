@@ -8,7 +8,7 @@ import {
   stockHealth,
   type StockHealth,
 } from "~/features/inventory/types";
-import { FilterBar, PageHeader, StatCard } from "~/shared/components/page-primitives";
+import { FilterBar, PageBody, PageHeader, StatCard } from "~/shared/components/page-primitives";
 import { PermissionGuard } from "~/shared/components/permission-guard";
 import { Button } from "~/shared/components/ui/button";
 import {
@@ -132,14 +132,14 @@ function InventoryPage() {
         </p>
       </FilterBar>
 
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border bg-card">
+      <PageBody className="overflow-x-auto rounded-md border border-border bg-card p-0">
         <InventoryTable
           balances={filtered}
           isLoading={balancesQuery.isLoading}
           isError={balancesQuery.isError}
           onRetry={() => void balancesQuery.refetch()}
         />
-      </div>
+      </PageBody>
     </div>
   );
 }

@@ -19,14 +19,27 @@ import {
 } from "~/features/sales/data/sales-store";
 import { formatMoney, round2 } from "~/features/sales/types";
 import { ProductImage } from "~/features/catalog/components/product-image";
+import {
+  activeVariants,
+  formatProductPrice,
+  type Product,
+} from "~/features/catalog/types";
 import { SearchInput } from "~/shared/components/search-input";
 import { Button } from "~/shared/components/ui/button";
 import { Input } from "~/shared/components/ui/input";
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "~/shared/components/ui/sheet";
 import { useWorkspace } from "~/shared/providers/workspace-provider";
 import { cn } from "~/shared/utils/cn";
 
 type CartLine = {
   productId: string;
+  variantId?: string;
   name: string;
   sku: string;
   unitPrice: number;
@@ -60,6 +73,10 @@ function taxRateFromProfile(profile: string): number {
   return 0;
 }
 
+function lineKey(productId: string, variantId?: string) {
+  return `${productId}::${variantId ?? ""}`;
+}
+
 function PosPage() {
   const queryClient = useQueryClient();
   const { organization, branch } = useWorkspace();
@@ -72,6 +89,7 @@ function PosPage() {
   const [receipt, setReceipt] = useState<ReceiptSummary | null>(null);
   const [pending, setPending] = useState(false);
   const [mobilePane, setMobilePane] = useState<MobilePane>("browse");
+  const [variantPicker, setVariantPicker] = useState<Product | null>(null);
 
   const categories = useMemo(() => {
     const names = new Set<string>();
@@ -88,10 +106,21 @@ function PosPage() {
     }
     const q = search.trim().toLowerCase();
     if (!q) return list;
-    return list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q),
-    );
+    return list.filter((p) => {
+      if (
+        p.name.toLowerCase().includes(q) ||
+        p.sku.toLowerCase().includes(q) ||
+        p.barcode?.toLowerCase().includes(q)
+      ) {
+        return true;
+      }
+      return p.variants.some(
+        (v) =>
+          v.sku.toLowerCase().includes(q) ||
+          v.barcode?.toLowerCase().includes(q) ||
+          v.name.toLowerCase().includes(q),
+      );
+    });
   }, [productsQuery.data, search, category]);
 
   const totals = useMemo(() => {
@@ -106,28 +135,58 @@ function PosPage() {
 
   const itemCount = cart.reduce((s, l) => s + l.quantity, 0);
 
-  function addProduct(productId: string) {
-    const product = (productsQuery.data ?? []).find((p) => p.id === productId);
-    if (!product) return;
+  function pushLine(product: Product, variantId?: string) {
+    const variants = activeVariants(product);
+    const variant =
+      variantId != null
+        ? variants.find((v) => v.id === variantId)
+        : variants.length === 1
+          ? variants[0]
+          : undefined;
+    if (variants.length > 0 && !variant) return;
+
+    const sku = variant?.sku ?? product.sku;
+    const name = variant ? `${product.name} · ${variant.name}` : product.name;
+    const unitPrice = variant?.price ?? product.price;
+    const key = lineKey(product.id, variant?.id);
+
     setCart((prev) => {
-      const existing = prev.find((l) => l.productId === productId);
+      const existing = prev.find(
+        (l) => lineKey(l.productId, l.variantId) === key,
+      );
       if (existing) {
         return prev.map((l) =>
-          l.productId === productId ? { ...l, quantity: l.quantity + 1 } : l,
+          lineKey(l.productId, l.variantId) === key
+            ? { ...l, quantity: l.quantity + 1 }
+            : l,
         );
       }
       return [
         ...prev,
         {
           productId: product.id,
-          name: product.name,
-          sku: product.sku,
-          unitPrice: product.price,
+          variantId: variant?.id,
+          name,
+          sku,
+          unitPrice,
           taxRate: taxRateFromProfile(product.taxProfile),
           quantity: 1,
         },
       ];
     });
+    setVariantPicker(null);
+    setMobilePane("cart");
+  }
+
+  function addProduct(productId: string) {
+    const product = (productsQuery.data ?? []).find((p) => p.id === productId);
+    if (!product) return;
+    const variants = activeVariants(product);
+    if (variants.length > 1) {
+      setVariantPicker(product);
+      return;
+    }
+    pushLine(product, variants[0]?.id);
   }
 
   async function completeSale() {
@@ -140,6 +199,7 @@ function PosPage() {
         customerName,
         items: cart.map((l) => ({
           productId: l.productId,
+          variantId: l.variantId,
           quantity: l.quantity,
         })),
       });
@@ -257,10 +317,12 @@ function PosPage() {
                 </span>
                 <div className="flex items-center justify-between gap-1">
                   <span className="truncate font-mono text-[10px] text-muted-foreground">
-                    {product.sku}
+                    {product.variants.length > 0
+                      ? `${product.variants.length} variants`
+                      : product.sku}
                   </span>
                   <span className="shrink-0 font-money text-[12px] font-semibold text-heading">
-                    {formatMoney(product.price)}
+                    {formatProductPrice(product)}
                   </span>
                 </div>
               </div>
@@ -323,9 +385,11 @@ function PosPage() {
               Tap products to add lines
             </li>
           ) : (
-            cart.map((line) => (
+            cart.map((line) => {
+              const key = lineKey(line.productId, line.variantId);
+              return (
               <li
-                key={line.productId}
+                key={key}
                 className="flex items-center gap-2 px-3 py-2.5 sm:px-4"
               >
                 <div className="min-w-0 flex-1">
@@ -345,7 +409,7 @@ function PosPage() {
                       setCart((prev) =>
                         prev
                           .map((l) =>
-                            l.productId === line.productId
+                            lineKey(l.productId, l.variantId) === key
                               ? { ...l, quantity: l.quantity - 1 }
                               : l,
                           )
@@ -365,7 +429,7 @@ function PosPage() {
                     onClick={() =>
                       setCart((prev) =>
                         prev.map((l) =>
-                          l.productId === line.productId
+                          lineKey(l.productId, l.variantId) === key
                             ? { ...l, quantity: l.quantity + 1 }
                             : l,
                         ),
@@ -380,7 +444,9 @@ function PosPage() {
                     size="icon-sm"
                     onClick={() =>
                       setCart((prev) =>
-                        prev.filter((l) => l.productId !== line.productId),
+                        prev.filter(
+                          (l) => lineKey(l.productId, l.variantId) !== key,
+                        ),
                       )
                     }
                   >
@@ -388,7 +454,8 @@ function PosPage() {
                   </Button>
                 </div>
               </li>
-            ))
+              );
+            })
           )}
         </ul>
 
@@ -460,6 +527,43 @@ function PosPage() {
           </Button>
         </div>
       ) : null}
+
+      <Sheet
+        open={Boolean(variantPicker)}
+        onOpenChange={(open) => {
+          if (!open) setVariantPicker(null);
+        }}
+      >
+        <SheetContent side="bottom" size="md" className="sm:max-w-lg sm:mx-auto">
+          <SheetHeader>
+            <SheetTitle>{variantPicker?.name ?? "Select variant"}</SheetTitle>
+          </SheetHeader>
+          <SheetBody className="space-y-2">
+            {variantPicker
+              ? activeVariants(variantPicker).map((variant) => (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2.5 text-left hover:border-primary hover:bg-muted"
+                    onClick={() => pushLine(variantPicker, variant.id)}
+                  >
+                    <span>
+                      <span className="block text-sm font-medium">
+                        {variant.name}
+                      </span>
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {variant.sku}
+                      </span>
+                    </span>
+                    <span className="font-money text-sm font-semibold">
+                      {formatMoney(variant.price)}
+                    </span>
+                  </button>
+                ))
+              : null}
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

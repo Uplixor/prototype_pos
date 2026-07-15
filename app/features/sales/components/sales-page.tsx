@@ -11,7 +11,7 @@ import {
   type SaleStatus,
 } from "~/features/sales/types";
 import { ConfirmDialog } from "~/shared/components/confirm-dialog";
-import { FilterBar, PageHeader } from "~/shared/components/page-primitives";
+import { FilterBar, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { PermissionGuard } from "~/shared/components/permission-guard";
 import { Button } from "~/shared/components/ui/button";
 import {
@@ -113,7 +113,7 @@ function SalesPage() {
         </p>
       </FilterBar>
 
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border bg-card">
+      <PageBody className="overflow-x-auto rounded-md border border-border bg-card p-0">
         <SalesTable
           sales={filtered}
           isLoading={salesQuery.isLoading}
@@ -121,7 +121,7 @@ function SalesPage() {
           onRetry={() => void salesQuery.refetch()}
           onCancel={requestCancel}
         />
-      </div>
+      </PageBody>
 
       <ConfirmDialog
         open={Boolean(cancelIds)}

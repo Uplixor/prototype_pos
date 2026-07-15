@@ -9,8 +9,12 @@ import {
 import { useProductDrawer } from "~/features/catalog/hooks/use-product-drawer";
 import { PRODUCT_STATUS_LABELS } from "~/features/catalog/schema";
 import type { ProductStatus } from "~/features/catalog/types";
+import {
+  categorySubtreeIds,
+  flattenCategoryOptions,
+} from "~/features/catalog/utils/category-tree";
 import { ConfirmDialog } from "~/shared/components/confirm-dialog";
-import { FilterBar, PageHeader } from "~/shared/components/page-primitives";
+import { FilterBar, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { PermissionGuard } from "~/shared/components/permission-guard";
 import { Button } from "~/shared/components/ui/button";
 import {
@@ -33,18 +37,32 @@ function CatalogPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [archiveIds, setArchiveIds] = useState<string[] | null>(null);
 
+  const categoryOptions = useMemo(
+    () => flattenCategoryOptions(categoriesQuery.data ?? []),
+    [categoriesQuery.data],
+  );
+
   const filtered = useMemo(() => {
     const products = productsQuery.data ?? [];
+    const categoryIds =
+      categoryFilter === "all"
+        ? null
+        : categorySubtreeIds(categoriesQuery.data ?? [], categoryFilter);
     return products.filter((product) => {
       if (statusFilter !== "all" && product.status !== statusFilter) {
         return false;
       }
-      if (categoryFilter !== "all" && product.categoryId !== categoryFilter) {
+      if (categoryIds && !categoryIds.has(product.categoryId)) {
         return false;
       }
       return true;
     });
-  }, [productsQuery.data, statusFilter, categoryFilter]);
+  }, [
+    productsQuery.data,
+    statusFilter,
+    categoryFilter,
+    categoriesQuery.data,
+  ]);
 
   const activeCount =
     productsQuery.data?.filter((p) => p.status === "active").length ?? 0;
@@ -100,9 +118,9 @@ function CatalogPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All categories</SelectItem>
-            {(categoriesQuery.data ?? []).map((category) => (
+            {categoryOptions.map((category) => (
               <SelectItem key={category.id} value={category.id}>
-                {category.name}
+                {category.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -113,7 +131,7 @@ function CatalogPage() {
         </p>
       </FilterBar>
 
-      <div className="mx-page mb-4 overflow-x-auto rounded-lg border border-border bg-card">
+      <PageBody className="overflow-x-auto rounded-lg border border-border bg-card p-0">
         <CatalogTable
           products={filtered}
           isLoading={productsQuery.isLoading}
@@ -121,7 +139,7 @@ function CatalogPage() {
           onRetry={() => void productsQuery.refetch()}
           onArchive={requestArchive}
         />
-      </div>
+      </PageBody>
 
       <ConfirmDialog
         open={Boolean(archiveIds)}

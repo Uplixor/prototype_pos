@@ -6,7 +6,7 @@ import { ProductImage } from "~/features/catalog/components/product-image";
 import { useProductDrawer } from "~/features/catalog/hooks/use-product-drawer";
 import { PRODUCT_TYPE_LABELS } from "~/features/catalog/schema";
 import {
-  formatMoney,
+  formatProductPrice,
   productStatusToBadge,
   type Product,
 } from "~/features/catalog/types";
@@ -46,57 +46,85 @@ function CatalogTable({
   onRetry,
   onArchive,
 }: CatalogTableProps) {
-  const { openEditProduct } = useProductDrawer();
+  const { openViewProduct, openEditProduct } = useProductDrawer();
 
   const columns = useMemo<ColumnDef<Product>[]>(
     () => [
       {
         accessorKey: "name",
         header: "Product",
-        cell: ({ row }) => (
-          <button
-            type="button"
-            className="flex items-center gap-3 text-left"
-            onClick={() => openEditProduct(row.original)}
-          >
-            <ProductImage
-              src={row.original.imageUrl}
-              alt={row.original.name}
-              size="sm"
-              className="shrink-0"
-            />
-            <span className="min-w-0">
-              <span className="block font-medium text-primary hover:underline">
-                {row.original.name}
+        size: 240,
+        maxSize: 280,
+        cell: ({ row }) => {
+          const { name, sku, imageUrl } = row.original;
+          return (
+            <button
+              type="button"
+              className="flex w-full max-w-[15rem] items-center gap-2.5 text-left sm:max-w-[18rem]"
+              title={name}
+              onClick={() => openViewProduct(row.original)}
+            >
+              <ProductImage
+                src={imageUrl}
+                alt={name}
+                size="sm"
+                className="shrink-0"
+              />
+              <span className="min-w-0 flex-1 overflow-hidden">
+                <span className="block truncate font-medium text-primary hover:underline">
+                  {name}
+                </span>
+                <span className="block truncate font-mono text-[11px] text-muted-foreground">
+                  {sku}
+                </span>
               </span>
-              <span className="block font-mono text-[11px] text-muted-foreground">
-                {row.original.sku}
-              </span>
-            </span>
-          </button>
-        ),
+            </button>
+          );
+        },
       },
       {
         accessorKey: "categoryName",
         header: "Category",
+        size: 140,
+        cell: ({ row }) => (
+          <span className="block max-w-[9rem] truncate text-xs" title={row.original.categoryName}>
+            {row.original.categoryName}
+          </span>
+        ),
       },
       {
         accessorKey: "productType",
         header: "Type",
+        size: 100,
         cell: ({ row }) => PRODUCT_TYPE_LABELS[row.original.productType],
+      },
+      {
+        id: "variants",
+        header: "Variants",
+        size: 80,
+        cell: ({ row }) => {
+          const count = row.original.variants.length;
+          return (
+            <span className="text-xs text-muted-foreground">
+              {count === 0 ? "—" : count}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "price",
         header: "Price",
+        size: 100,
         cell: ({ row }) => (
           <span className="tabular-nums">
-            {formatMoney(row.original.price)}
+            {formatProductPrice(row.original)}
           </span>
         ),
       },
       {
         accessorKey: "status",
         header: "Status",
+        size: 100,
         cell: ({ row }) => (
           <StatusBadge status={productStatusToBadge(row.original.status)} />
         ),
@@ -104,8 +132,12 @@ function CatalogTable({
       {
         id: "branches",
         header: "Branches",
+        size: 120,
         cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground">
+          <span
+            className="block max-w-[7rem] truncate text-xs text-muted-foreground"
+            title={branchLabels(row.original.branchIds)}
+          >
             {branchLabels(row.original.branchIds)}
           </span>
         ),
@@ -113,6 +145,7 @@ function CatalogTable({
       {
         id: "actions",
         header: "",
+        size: 48,
         enableSorting: false,
         enableHiding: false,
         cell: ({ row }) => (
@@ -128,6 +161,9 @@ function CatalogTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => openViewProduct(row.original)}>
+                View
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => openEditProduct(row.original)}>
                 Edit
               </DropdownMenuItem>
@@ -146,7 +182,7 @@ function CatalogTable({
         ),
       },
     ],
-    [openEditProduct, onArchive],
+    [openViewProduct, openEditProduct, onArchive],
   );
 
   return (
@@ -171,7 +207,9 @@ function CatalogTable({
             status: row.status,
             price: row.price,
             cost: row.cost,
+            variants: row.variants.length,
             unit: row.baseUnit,
+            brand: row.brand ?? "",
             branches: branchLabels(row.branchIds),
           })),
           "catalog-products",

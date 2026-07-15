@@ -12,6 +12,11 @@ import {
   type CreateSaleValues,
 } from "~/features/sales/schema";
 import { formatMoney } from "~/features/sales/types";
+import {
+  activeVariants,
+  formatProductPrice,
+  type Product,
+} from "~/features/catalog/types";
 import { useAppForm } from "~/shared/components/form/use-app-form";
 import {
   Form,
@@ -35,6 +40,15 @@ import { Textarea } from "~/shared/components/ui/textarea";
 import { useDrawer } from "~/shared/providers/drawer-provider";
 import { useWorkspace } from "~/shared/providers/workspace-provider";
 
+function unitPrice(product: Product, variantId?: string): number {
+  const variants = activeVariants(product);
+  if (variants.length === 0) return product.price;
+  const match = variantId
+    ? variants.find((v) => v.id === variantId)
+    : variants[0];
+  return match?.price ?? product.price;
+}
+
 export type CreateSaleFormProps = {
   drawerId: string;
 };
@@ -49,7 +63,7 @@ function CreateSaleForm({ drawerId }: CreateSaleFormProps) {
     defaultValues: {
       customerName: "Walk-in",
       notes: "",
-      items: [{ productId: "", quantity: 1 }],
+      items: [{ productId: "", variantId: undefined, quantity: 1 }],
     },
     resolver: zodResolver(createSaleSchema) as Resolver<CreateSaleValues>,
     draftKey: `sales.create.draft.${branch.id}`,
@@ -67,7 +81,9 @@ function CreateSaleForm({ drawerId }: CreateSaleFormProps) {
     return watchedItems.reduce((sum, line) => {
       const product = products.find((item) => item.id === line.productId);
       if (!product) return sum;
-      return sum + product.price * (Number(line.quantity) || 0);
+      return (
+        sum + unitPrice(product, line.variantId) * (Number(line.quantity) || 0)
+      );
     }, 0);
   }, [watchedItems, products]);
 
@@ -77,7 +93,11 @@ function CreateSaleForm({ drawerId }: CreateSaleFormProps) {
       branchId: branch.id,
       customerName: values.customerName,
       notes: values.notes,
-      items: values.items,
+      items: values.items.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId || undefined,
+        quantity: item.quantity,
+      })),
     });
     closeDrawer(drawerId);
   }
@@ -115,73 +135,119 @@ function CreateSaleForm({ drawerId }: CreateSaleFormProps) {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => append({ productId: "", quantity: 1 })}
+                onClick={() =>
+                  append({ productId: "", variantId: undefined, quantity: 1 })
+                }
               >
                 <Plus className="size-3.5" />
                 Add line
               </Button>
             </div>
 
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="grid grid-cols-[1fr_88px_32px] gap-2"
-              >
-                <FormField
-                  control={form.control}
-                  name={`items.${index}.productId`}
-                  render={({ field: productField }) => (
-                    <FormItem>
-                      <Select
-                        value={productField.value}
-                        onValueChange={productField.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Product" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {products.map((product) => (
-                            <SelectItem key={product.id} value={product.id}>
-                              {product.name} · {formatMoney(product.price)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`items.${index}.quantity`}
-                  render={({ field: qtyField }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={1}
-                          step={1}
-                          {...qtyField}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={fields.length === 1}
-                  onClick={() => remove(index)}
-                  aria-label="Remove line"
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
-              </div>
-            ))}
+            {fields.map((field, index) => {
+              const productId = watchedItems[index]?.productId;
+              const product = products.find((p) => p.id === productId);
+              const variants = product ? activeVariants(product) : [];
+              return (
+                <div key={field.id} className="space-y-2 rounded-md border border-border p-2">
+                  <div className="grid grid-cols-[1fr_72px_32px] gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.productId`}
+                      render={({ field: productField }) => (
+                        <FormItem>
+                          <Select
+                            value={productField.value}
+                            onValueChange={(value) => {
+                              productField.onChange(value);
+                              const next = products.find((p) => p.id === value);
+                              const nextVariants = next
+                                ? activeVariants(next)
+                                : [];
+                              form.setValue(
+                                `items.${index}.variantId`,
+                                nextVariants.length === 1
+                                  ? nextVariants[0]!.id
+                                  : undefined,
+                              );
+                            }}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Product" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {products.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.name} · {formatProductPrice(item)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.quantity`}
+                      render={({ field: qtyField }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              step={1}
+                              {...qtyField}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      disabled={fields.length === 1}
+                      onClick={() => remove(index)}
+                      aria-label="Remove line"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </div>
+                  {variants.length > 1 ? (
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.variantId`}
+                      render={({ field: variantField }) => (
+                        <FormItem>
+                          <Select
+                            value={variantField.value ?? ""}
+                            onValueChange={variantField.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select variant" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {variants.map((variant) => (
+                                <SelectItem key={variant.id} value={variant.id}>
+                                  {variant.name} · {formatMoney(variant.price)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
 
           <FormField

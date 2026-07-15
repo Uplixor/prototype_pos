@@ -8,12 +8,13 @@ import { useWorkspace } from "~/shared/providers/workspace-provider";
  * Redirects to sign-in when no demo role session is active.
  */
 export default function AppLayout() {
-  const { isAuthenticated, user, homePath } = useWorkspace();
+  const { isAuthenticated, sessionReady, user, homePath } = useWorkspace();
   const location = useLocation();
   const navigate = useNavigate();
   const redirecting = useRef(false);
 
   useEffect(() => {
+    if (!sessionReady) return;
     if (!isAuthenticated) {
       if (redirecting.current) return;
       redirecting.current = true;
@@ -29,6 +30,7 @@ export default function AppLayout() {
       void navigate("/platform", { replace: true });
     }
   }, [
+    sessionReady,
     isAuthenticated,
     user.role,
     location.pathname,
@@ -36,7 +38,8 @@ export default function AppLayout() {
     homePath,
   ]);
 
-  if (!isAuthenticated || user.role === "platform") {
+  // Match SSR: wait for session read before rendering shell vs spinner gate.
+  if (!sessionReady || !isAuthenticated || user.role === "platform") {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />

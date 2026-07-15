@@ -7,7 +7,7 @@ import {
   useTransfersQuery,
 } from "~/features/transfers/api/transfers-mutations";
 import { BRANCH_OPTIONS } from "~/features/catalog/data/catalog-store";
-import { FilterBar, PageHeader } from "~/shared/components/page-primitives";
+import { FilterBar, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { PermissionGuard } from "~/shared/components/permission-guard";
 import { StatusBadge } from "~/shared/components/status-badge";
 import { Button } from "~/shared/components/ui/button";
@@ -68,7 +68,7 @@ function TransfersPage() {
           {(transfersQuery.data ?? []).length} transfers
         </p>
       </FilterBar>
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+      <PageBody className="overflow-x-auto rounded-md border border-border p-0">
         <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
@@ -122,7 +122,7 @@ function TransfersPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </PageBody>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent size="md">

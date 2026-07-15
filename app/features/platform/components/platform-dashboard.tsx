@@ -5,7 +5,7 @@ import {
   usePlatformTenantsQuery,
 } from "~/features/platform/api/platform-mutations";
 import { formatMoney } from "~/features/sales/types";
-import { LoadingState, MetricCard, PageHeader } from "~/shared/components/page-primitives";
+import { LoadingState, MetricCard, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { StatusBadge } from "~/shared/components/status-badge";
 import { Button } from "~/shared/components/ui/button";
 
@@ -30,17 +30,18 @@ function PlatformDashboardPage() {
         }
       />
 
-      <div className="mx-page mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Tenants" value={String(m?.tenants ?? 0)} />
-        <MetricCard label="Active" value={String(m?.active ?? 0)} />
-        <MetricCard label="Trials" value={String(m?.trial ?? 0)} />
-        <MetricCard
-          label="Platform MRR"
-          value={formatMoney(m?.mrr ?? 0)}
-        />
-      </div>
+      <PageBody className="space-y-6">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Tenants" value={String(m?.tenants ?? 0)} />
+          <MetricCard label="Active" value={String(m?.active ?? 0)} />
+          <MetricCard label="Trials" value={String(m?.trial ?? 0)} />
+          <MetricCard
+            label="Platform MRR"
+            value={formatMoney(m?.mrr ?? 0)}
+          />
+        </div>
 
-      <div className="mx-page my-6 grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
         <section className="rounded border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h2 className="text-[14px] font-semibold text-heading">
@@ -108,7 +109,8 @@ function PlatformDashboardPage() {
             ))}
           </ul>
         </section>
-      </div>
+        </div>
+      </PageBody>
     </div>
   );
 }

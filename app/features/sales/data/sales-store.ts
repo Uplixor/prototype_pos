@@ -1,5 +1,6 @@
 import { listProducts } from "~/features/catalog/data/catalog-store";
-import type { Product } from "~/features/catalog/types";
+import type { Product, ProductVariant } from "~/features/catalog/types";
+import { activeVariants } from "~/features/catalog/types";
 import {
   computeSaleTotals,
   round2,
@@ -27,16 +28,36 @@ function delay(ms = 260): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function resolveVariant(
+  product: Product,
+  variantId?: string,
+): ProductVariant | undefined {
+  const variants = activeVariants(product);
+  if (variants.length === 0) return undefined;
+  if (variantId) {
+    const match = variants.find((v) => v.id === variantId);
+    if (!match) throw new Error("Variant is not sellable");
+    return match;
+  }
+  if (variants.length === 1) return variants[0];
+  throw new Error("Select a product variant");
+}
+
 function lineFromProduct(
   product: Product,
   quantity: number,
+  variantId?: string,
 ): Omit<SaleItem, "id"> {
   const taxRate = taxRateFromProfile(product.taxProfile);
-  const unitPrice = product.price;
+  const variant = resolveVariant(product, variantId);
+  const unitPrice = variant?.price ?? product.price;
+  const sku = variant?.sku ?? product.sku;
+  const name = variant ? `${product.name} · ${variant.name}` : product.name;
   return {
     productId: product.id,
-    sku: product.sku,
-    name: product.name,
+    variantId: variant?.id,
+    sku,
+    name,
     unitPrice,
     quantity,
     taxRate,
@@ -338,7 +359,7 @@ export type CreateSaleInput = {
   branchId: string;
   customerName: string;
   notes?: string;
-  items: Array<{ productId: string; quantity: number }>;
+  items: Array<{ productId: string; variantId?: string; quantity: number }>;
 };
 
 export async function createSale(input: CreateSaleInput): Promise<Sale> {
@@ -357,7 +378,7 @@ export async function createSale(input: CreateSaleInput): Promise<Sale> {
     }
     return {
       id: `si_new_${Date.now()}_${index}`,
-      ...lineFromProduct(product, line.quantity),
+      ...lineFromProduct(product, line.quantity, line.variantId),
     };
   });
 
@@ -394,6 +415,7 @@ export async function addSaleItem(
   saleId: string,
   productId: string,
   quantity: number,
+  variantId?: string,
 ): Promise<Sale> {
   await delay(150);
   const sale = sales.find((item) => item.id === saleId);
@@ -413,11 +435,16 @@ export async function addSaleItem(
     throw new Error("Product is not sellable at this branch");
   }
 
-  const existing = sale.items.find((item) => item.productId === productId);
+  const line = lineFromProduct(product, quantity, variantId);
+  const existing = sale.items.find(
+    (item) =>
+      item.productId === productId &&
+      (item.variantId ?? undefined) === (line.variantId ?? undefined),
+  );
   let items: SaleItem[];
   if (existing) {
     items = sale.items.map((item) =>
-      item.productId === productId
+      item.id === existing.id
         ? {
             ...item,
             quantity: item.quantity + quantity,
@@ -432,7 +459,7 @@ export async function addSaleItem(
       ...sale.items,
       {
         id: `si_${Date.now()}`,
-        ...lineFromProduct(product, quantity),
+        ...line,
       },
     ];
   }

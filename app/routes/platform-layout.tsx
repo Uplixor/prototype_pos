@@ -7,7 +7,7 @@ import { useWorkspace } from "~/shared/providers/workspace-provider";
  * SaaS platform console — only the platform demo role may enter.
  */
 export default function PlatformLayout() {
-  const { isAuthenticated, homePath, user } = useWorkspace();
+  const { isAuthenticated, sessionReady, homePath, user } = useWorkspace();
   const location = useLocation();
   const navigate = useNavigate();
   const redirecting = useRef(false);
@@ -15,6 +15,7 @@ export default function PlatformLayout() {
   const isPlatform = user.role === "platform";
 
   useEffect(() => {
+    if (!sessionReady) return;
     if (!isAuthenticated) {
       if (redirecting.current) return;
       redirecting.current = true;
@@ -31,6 +32,7 @@ export default function PlatformLayout() {
       });
     }
   }, [
+    sessionReady,
     isAuthenticated,
     isPlatform,
     homePath,
@@ -38,7 +40,7 @@ export default function PlatformLayout() {
     navigate,
   ]);
 
-  if (!isAuthenticated || !isPlatform) {
+  if (!sessionReady || !isAuthenticated || !isPlatform) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />

@@ -45,6 +45,8 @@ export type WorkspaceContextValue = {
   permissions: readonly string[];
   isOnline: boolean;
   isAuthenticated: boolean;
+  /** False until client reads demo-role session (SSR-safe). */
+  sessionReady: boolean;
   homePath: string;
   setOrganization: (organization: Organization) => void;
   setBranch: (branch: Branch) => void;

@@ -11,7 +11,7 @@ import {
   useUsersQuery,
   type MembershipUser,
 } from "~/features/settings/api/settings-mutations";
-import { LoadingState, PageHeader } from "~/shared/components/page-primitives";
+import { LoadingState, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { PermissionGuard } from "~/shared/components/permission-guard";
 import { StatusBadge } from "~/shared/components/status-badge";
 import { Button } from "~/shared/components/ui/button";
@@ -90,13 +90,13 @@ export function OrganizationPage() {
           </PermissionGuard>
         }
       />
-      <div className="mx-page mb-6 grid max-w-xl gap-3 rounded-md border border-border bg-card p-4">
+      <PageBody className="grid max-w-xl gap-3 rounded-md border border-border bg-card p-4">
         <Field label="Display name" value={name} onChange={setName} />
         <Field label="Legal name" value={legalName} onChange={setLegalName} />
         <Field label="Timezone" value={timezone} onChange={setTimezone} />
         <Field label="Currency" value={currency} onChange={setCurrency} />
         <Field label="Tax ID" value={taxId} onChange={setTaxId} />
-      </div>
+      </PageBody>
     </div>
   );
 }
@@ -124,7 +124,7 @@ export function BranchesSettingsPage() {
           </PermissionGuard>
         }
       />
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+      <PageBody className="overflow-x-auto rounded-md border border-border p-0">
         <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
@@ -164,7 +164,7 @@ export function BranchesSettingsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </PageBody>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent size="md">
           <SheetHeader>
@@ -218,7 +218,7 @@ export function UsersSettingsPage() {
           </PermissionGuard>
         }
       />
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+      <PageBody className="overflow-x-auto rounded-md border border-border p-0">
         <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
@@ -265,7 +265,7 @@ export function UsersSettingsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </PageBody>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent size="md">
           <SheetHeader>

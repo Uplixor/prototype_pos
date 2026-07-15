@@ -63,8 +63,12 @@ export function useCreateSaleMutation() {
 export function useAddSaleItemMutation(saleId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { productId: string; quantity: number }) =>
-      addSaleItem(saleId, input.productId, input.quantity),
+    mutationFn: (input: {
+      productId: string;
+      quantity: number;
+      variantId?: string;
+    }) =>
+      addSaleItem(saleId, input.productId, input.quantity, input.variantId),
     onSuccess: () => {
       invalidateSales(queryClient, saleId);
       toast.success("Item added");

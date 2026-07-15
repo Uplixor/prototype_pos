@@ -120,7 +120,7 @@ function Sidebar() {
 
       <div
         className={cn(
-          "flex items-center border-b border-sidebar-border",
+          "flex shrink-0 items-center border-b border-sidebar-border",
           showLabels ? "gap-3 px-4 py-4" : "justify-center px-0 py-4",
         )}
       >
@@ -161,7 +161,7 @@ function Sidebar() {
       <TooltipProvider delayDuration={0}>
         <nav
           className={cn(
-            "flex flex-1 flex-col overflow-y-auto",
+            "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain",
             showLabels ? "gap-1 px-2 py-3" : "items-center gap-1 px-0 py-2",
           )}
         >
@@ -189,7 +189,7 @@ function Sidebar() {
 
       <div
         className={cn(
-          "mt-auto flex flex-col border-t border-sidebar-border",
+          "mt-auto flex shrink-0 flex-col border-t border-sidebar-border",
           showLabels ? "gap-0.5 px-2 py-3" : "items-center gap-0.5 px-0 py-3",
         )}
       >

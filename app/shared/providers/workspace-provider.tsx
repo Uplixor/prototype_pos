@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -78,19 +79,19 @@ export type WorkspaceProviderProps = {
   children: ReactNode;
 };
 
-/** Read session only in the browser; SSR stays logged out to avoid mismatches. */
-function readClientRole(): DemoRoleId | null {
-  if (typeof window === "undefined") return null;
-  return loadStoredRoleId();
-}
-
 function WorkspaceProvider({ children }: WorkspaceProviderProps) {
-  // Lazy init runs once per mount on the client — no useEffect session gate.
-  const [roleId, setRoleId] = useState<DemoRoleId | null>(readClientRole);
+  // Always start null so SSR HTML matches the first client render (avoids hydration mismatch).
+  const [roleId, setRoleId] = useState<DemoRoleId | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
   const [organization, setOrganization] = useState(DEFAULT_ORG);
   const [branch, setBranch] = useState(DEFAULT_BRANCH);
   const [workspace, setWorkspace] = useState(DEFAULT_WORKSPACE);
   const [isOnline] = useState(true);
+
+  useEffect(() => {
+    setRoleId(loadStoredRoleId());
+    setSessionReady(true);
+  }, []);
 
   const preset = roleId ? ROLE_PRESETS[roleId] : null;
 
@@ -136,6 +137,7 @@ function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       permissions,
       isOnline,
       isAuthenticated,
+      sessionReady,
       homePath,
       setOrganization: handleSetOrganization,
       setBranch: handleSetBranch,
@@ -152,6 +154,7 @@ function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       permissions,
       isOnline,
       isAuthenticated,
+      sessionReady,
       homePath,
       handleSetOrganization,
       handleSetBranch,

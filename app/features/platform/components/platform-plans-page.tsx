@@ -1,6 +1,6 @@
 import { usePlatformPlansQuery } from "~/features/platform/api/platform-mutations";
 import { formatMoney } from "~/features/sales/types";
-import { LoadingState, PageHeader } from "~/shared/components/page-primitives";
+import { LoadingState, PageBody, PageHeader } from "~/shared/components/page-primitives";
 
 function PlatformPlansPage() {
   const query = usePlatformPlansQuery();
@@ -14,7 +14,7 @@ function PlatformPlansPage() {
         description="Commercial packs entitled to Organizations — capabilities gate tenant features"
       />
 
-      <div className="mx-page my-6 grid gap-4 md:grid-cols-3">
+      <PageBody className="grid gap-4 md:grid-cols-3">
         {(query.data ?? []).map((plan) => (
           <section
             key={plan.id}
@@ -50,7 +50,7 @@ function PlatformPlansPage() {
             </ul>
           </section>
         ))}
-      </div>
+      </PageBody>
     </div>
   );
 }

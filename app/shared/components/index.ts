@@ -68,6 +68,7 @@ export {
   LoadingState,
   MetricCard,
   PageHeader,
+  PageBody,
   StatCard,
   Toolbar,
 } from "./page-primitives";

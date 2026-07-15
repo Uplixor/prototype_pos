@@ -27,6 +27,7 @@ import {
   SALE_STATUS_LABELS,
   type Sale,
 } from "~/features/sales/types";
+import { activeVariants, formatProductPrice } from "~/features/catalog/types";
 import { ConfirmDialog } from "~/shared/components/confirm-dialog";
 import {
   Form,
@@ -71,6 +72,7 @@ function SaleDetailPanel({
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [productId, setProductId] = useState("");
+  const [variantId, setVariantId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [refundFormOpen, setRefundFormOpen] = useState(false);
   const [pendingRefund, setPendingRefund] = useState<RefundSaleValues | null>(
@@ -79,6 +81,12 @@ function SaleDetailPanel({
 
   const branchId = sale?.branchId ?? "";
   const sellableQuery = useSellableProductsQuery(branchId);
+  const selectedProduct = (sellableQuery.data ?? []).find(
+    (p) => p.id === productId,
+  );
+  const selectedVariants = selectedProduct
+    ? activeVariants(selectedProduct)
+    : [];
   const addItem = useAddSaleItemMutation(saleId);
   const removeItem = useRemoveSaleItemMutation(saleId);
   const requestPay = useRequestPaymentMutation();
@@ -267,14 +275,26 @@ function SaleDetailPanel({
             <div className="space-y-2 rounded-md border border-border p-3">
               <p className="text-xs font-medium">Add product</p>
               <div className="grid grid-cols-[1fr_72px_auto] gap-2">
-                <Select value={productId} onValueChange={setProductId}>
+                <Select
+                  value={productId}
+                  onValueChange={(value) => {
+                    setProductId(value);
+                    const product = (sellableQuery.data ?? []).find(
+                      (p) => p.id === value,
+                    );
+                    const variants = product ? activeVariants(product) : [];
+                    setVariantId(
+                      variants.length === 1 ? variants[0]!.id : "",
+                    );
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Sellable product" />
                   </SelectTrigger>
                   <SelectContent>
                     {(sellableQuery.data ?? []).map((product) => (
                       <SelectItem key={product.id} value={product.id}>
-                        {product.name}
+                        {product.name} · {formatProductPrice(product)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -290,13 +310,22 @@ function SaleDetailPanel({
                 <Button
                   type="button"
                   size="sm"
-                  disabled={!productId || addItem.isPending}
+                  disabled={
+                    !productId ||
+                    addItem.isPending ||
+                    (selectedVariants.length > 1 && !variantId)
+                  }
                   onClick={() => {
                     addItem.mutate(
-                      { productId, quantity },
+                      {
+                        productId,
+                        quantity,
+                        variantId: variantId || undefined,
+                      },
                       {
                         onSuccess: () => {
                           setProductId("");
+                          setVariantId("");
                           setQuantity(1);
                         },
                       },
@@ -307,6 +336,20 @@ function SaleDetailPanel({
                   Add
                 </Button>
               </div>
+              {selectedVariants.length > 1 ? (
+                <Select value={variantId} onValueChange={setVariantId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select variant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedVariants.map((variant) => (
+                      <SelectItem key={variant.id} value={variant.id}>
+                        {variant.name} · {formatMoney(variant.price)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
             </div>
           </PermissionGuard>
         ) : null}

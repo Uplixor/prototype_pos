@@ -12,6 +12,8 @@ export type PaymentMethod = "cash" | "card" | "other";
 export type SaleItem = {
   id: string;
   productId: string;
+  /** Present when the sale line is a specific product variant */
+  variantId?: string;
   /** Frozen sell-time snapshot — never recalculated from Catalog after add */
   sku: string;
   name: string;

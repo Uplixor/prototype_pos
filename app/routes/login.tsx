@@ -17,10 +17,12 @@ export default function LoginRoute() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const denied = params.get("denied") === "1";
-  const { assumeRole, isAuthenticated, homePath, organization } = useWorkspace();
+  const { assumeRole, isAuthenticated, sessionReady, homePath, organization } =
+    useWorkspace();
   const redirecting = useRef(false);
 
   useEffect(() => {
+    if (!sessionReady) return;
     if (!isAuthenticated || denied) {
       redirecting.current = false;
       return;
@@ -28,7 +30,7 @@ export default function LoginRoute() {
     if (redirecting.current) return;
     redirecting.current = true;
     void navigate(homePath, { replace: true });
-  }, [isAuthenticated, homePath, denied, navigate]);
+  }, [sessionReady, isAuthenticated, homePath, denied, navigate]);
 
   if (denied) {
     return (
@@ -51,7 +53,7 @@ export default function LoginRoute() {
     );
   }
 
-  if (isAuthenticated) {
+  if (!sessionReady || isAuthenticated) {
     return (
       <main className="flex min-h-dvh items-center justify-center bg-background">
         <div className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />

@@ -46,6 +46,18 @@ function PageHeader({
   );
 }
 
+/** Standard content region under PageHeader / FilterBar — keeps table vs headline spacing consistent. */
+export type PageBodyProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+function PageBody({ children, className }: PageBodyProps) {
+  return (
+    <div className={cn("mx-page mt-4 mb-6", className)}>{children}</div>
+  );
+}
+
 export type ToolbarProps = {
   children: React.ReactNode;
   className?: string;
@@ -73,7 +85,7 @@ function FilterBar({ children, className }: FilterBarProps) {
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-2 px-page py-2",
+        "flex flex-wrap items-center gap-2 px-page pt-3 pb-2",
         className,
       )}
     >
@@ -250,6 +262,7 @@ export {
   FilterBar,
   LoadingState,
   MetricCard,
+  PageBody,
   PageHeader,
   StatCard,
   Toolbar,

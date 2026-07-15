@@ -4,7 +4,7 @@ import {
   useSetTenantStatusMutation,
 } from "~/features/platform/api/platform-mutations";
 import { formatMoney } from "~/features/sales/types";
-import { LoadingState, PageHeader } from "~/shared/components/page-primitives";
+import { LoadingState, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { SearchInput } from "~/shared/components/search-input";
 import { StatusBadge } from "~/shared/components/status-badge";
 import { Button } from "~/shared/components/ui/button";
@@ -42,17 +42,16 @@ function PlatformTenantsPage() {
         description="Organizations on the platform — suspend, restore, and inspect plan scope"
       />
 
-      <div className="mx-page mt-3 mb-3">
+      <PageBody className="space-y-3">
         <SearchInput
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search tenants…"
           containerClassName="max-w-sm"
         />
-      </div>
 
-      <div className="mx-page mb-6 overflow-x-auto overscroll-x-contain rounded-md border border-border [-webkit-overflow-scrolling:touch]">
-        <table className="w-full min-w-[48rem] text-sm">
+        <div className="overflow-x-auto overscroll-x-contain rounded-md border border-border [-webkit-overflow-scrolling:touch]">
+          <table className="w-full min-w-[48rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
               <th className="px-3 py-2 text-left font-medium">Organization</th>
@@ -116,7 +115,8 @@ function PlatformTenantsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+        </div>
+      </PageBody>
     </div>
   );
 }

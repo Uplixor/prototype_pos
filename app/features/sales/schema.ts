@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const saleItemInputSchema = z.object({
   productId: z.string().min(1, "Product is required"),
+  variantId: z.string().optional(),
   quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
 });
 

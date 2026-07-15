@@ -36,19 +36,40 @@ export function useCategoriesQuery() {
 }
 
 function toProductPayload(values: ProductFormValues) {
+  const mediaUrls = (values.mediaUrls ?? []).map((u) => u.trim()).filter(Boolean);
   return {
     name: values.name,
     sku: values.sku,
+    barcode: values.barcode?.trim() || undefined,
+    brand: values.brand?.trim() || undefined,
     description: values.description,
     categoryId: values.categoryId,
     productType: values.productType,
     status: values.status,
     baseUnit: values.baseUnit,
     price: values.price,
+    compareAtPrice: values.compareAtPrice,
     cost: values.cost,
     taxProfile: values.taxProfile,
     trackInventory: values.trackInventory,
     branchIds: values.branchIds,
+    collections: values.collections ?? [],
+    tags: values.tags ?? [],
+    supplier: values.supplier?.trim() || undefined,
+    weightOz: values.weightOz,
+    dimL: values.dimL,
+    dimW: values.dimW,
+    dimH: values.dimH,
+    hsCode: values.hsCode?.trim() || undefined,
+    optionAxes: values.optionAxes,
+    variants: values.variants.map((variant) => ({
+      ...variant,
+      barcode: variant.barcode?.trim() || undefined,
+      imageUrl: variant.imageUrl?.trim() || undefined,
+    })),
+    modifiers: values.modifiers,
+    mediaUrls,
+    imageUrl: values.imageUrl?.trim() || mediaUrls[0] || undefined,
   };
 }
 

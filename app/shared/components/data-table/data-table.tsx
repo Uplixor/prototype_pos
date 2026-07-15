@@ -319,6 +319,10 @@ function DataTable<TData>({
                     <td
                       key={cell.id}
                       className="px-3 align-middle whitespace-nowrap"
+                      style={{
+                        width: cell.column.getSize(),
+                        maxWidth: cell.column.columnDef.maxSize,
+                      }}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

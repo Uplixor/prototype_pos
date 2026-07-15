@@ -1,31 +1,37 @@
-import { ProductForm } from "~/features/catalog/components/product-form";
+import { useNavigate } from "react-router";
+import { ProductViewPanel } from "~/features/catalog/components/product-view-panel";
 import type { Product } from "~/features/catalog/types";
 import { useDrawer } from "~/shared/providers/drawer-provider";
 
+/**
+ * Catalog product UX:
+ * - New → full editor page
+ * - Row click → Stitch-style view drawer
+ * - Edit → full editor page
+ */
 export function useProductDrawer() {
+  const navigate = useNavigate();
   const { openDrawer } = useDrawer();
 
   function openCreateProduct() {
-    const drawerId = "product-create";
-    openDrawer({
-      id: drawerId,
-      title: "New product",
-      description: "Define sellable product identity and pricing",
-      size: "lg",
-      content: <ProductForm drawerId={drawerId} />,
-    });
+    void navigate("/catalog/products/new");
   }
 
-  function openEditProduct(product: Product) {
-    const drawerId = `product-${product.id}`;
+  function openViewProduct(product: Product) {
+    const drawerId = `product-view-${product.id}`;
     openDrawer({
       id: drawerId,
       title: product.name,
-      description: `${product.sku} · ${product.categoryName}`,
       size: "lg",
-      content: <ProductForm product={product} drawerId={drawerId} />,
+      hideHeader: true,
+      content: <ProductViewPanel product={product} drawerId={drawerId} />,
     });
   }
 
-  return { openCreateProduct, openEditProduct };
+  function openEditProduct(product: Product | string) {
+    const id = typeof product === "string" ? product : product.id;
+    void navigate(`/catalog/products/${id}`);
+  }
+
+  return { openCreateProduct, openViewProduct, openEditProduct };
 }

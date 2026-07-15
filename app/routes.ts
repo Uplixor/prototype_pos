@@ -14,6 +14,11 @@ export default [
     route("dashboard", "routes/dashboard.tsx"),
     route("pos", "routes/pos.tsx"),
     route("catalog", "routes/catalog.tsx"),
+    route("catalog/products/new", "routes/catalog.products.new.tsx"),
+    route(
+      "catalog/products/:productId",
+      "routes/catalog.products.$productId.tsx",
+    ),
     route("catalog/categories", "routes/catalog.categories.tsx"),
     route("catalog/units", "routes/catalog.units.tsx"),
     route("catalog/pricing", "routes/catalog.pricing.tsx"),

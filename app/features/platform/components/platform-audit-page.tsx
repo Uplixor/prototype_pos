@@ -1,5 +1,5 @@
 import { usePlatformAuditQuery } from "~/features/platform/api/platform-mutations";
-import { LoadingState, PageHeader } from "~/shared/components/page-primitives";
+import { LoadingState, PageBody, PageHeader } from "~/shared/components/page-primitives";
 
 function PlatformAuditPage() {
   const query = usePlatformAuditQuery();
@@ -13,7 +13,7 @@ function PlatformAuditPage() {
         description="Operator actions across tenants — separate from Organization audit trails"
       />
 
-      <div className="mx-page mb-6 overflow-x-auto overscroll-x-contain rounded-md border border-border [-webkit-overflow-scrolling:touch]">
+      <PageBody className="overflow-x-auto overscroll-x-contain rounded-md border border-border p-0 [-webkit-overflow-scrolling:touch]">
         <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
@@ -38,7 +38,7 @@ function PlatformAuditPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </PageBody>
     </div>
   );
 }

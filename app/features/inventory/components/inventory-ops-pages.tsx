@@ -14,7 +14,7 @@ import {
   MOVEMENT_TYPE_LABELS,
   type MovementType,
 } from "~/features/inventory/types";
-import { FilterBar, PageHeader } from "~/shared/components/page-primitives";
+import { FilterBar, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { PermissionGuard } from "~/shared/components/permission-guard";
 import { StatusBadge } from "~/shared/components/status-badge";
 import { Button } from "~/shared/components/ui/button";
@@ -86,7 +86,7 @@ export function MovementsPage() {
           </SelectContent>
         </Select>
       </FilterBar>
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+      <PageBody className="overflow-x-auto rounded-md border border-border p-0">
         <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
@@ -121,7 +121,7 @@ export function MovementsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </PageBody>
     </div>
   );
 }
@@ -147,7 +147,7 @@ export function AdjustmentsPage() {
           </PermissionGuard>
         }
       />
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+      <PageBody className="overflow-x-auto rounded-md border border-border p-0">
         <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
@@ -173,7 +173,7 @@ export function AdjustmentsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </PageBody>
     </div>
   );
 }
@@ -206,7 +206,7 @@ export function CountsPage() {
           </PermissionGuard>
         }
       />
-      <div className="mx-page mb-4 overflow-x-auto rounded-md border border-border">
+      <PageBody className="overflow-x-auto rounded-md border border-border p-0">
         <table className="w-full min-w-[40rem] text-sm">
           <thead className="bg-muted/80 text-xs text-muted-foreground">
             <tr className="border-b border-border">
@@ -258,7 +258,7 @@ export function CountsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </PageBody>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent size="md">

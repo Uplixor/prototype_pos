@@ -7,7 +7,7 @@ import {
   useUpdateRolePermissionsMutation,
 } from "~/features/settings/api/roles-mutations";
 import { PERMISSION_MODULES } from "~/features/settings/data/roles-store";
-import { LoadingState, PageHeader } from "~/shared/components/page-primitives";
+import { LoadingState, PageBody, PageHeader } from "~/shared/components/page-primitives";
 import { PermissionGuard } from "~/shared/components/permission-guard";
 import { Button } from "~/shared/components/ui/button";
 import { Checkbox } from "~/shared/components/ui/checkbox";
@@ -150,7 +150,7 @@ function RolesPermissionsPage() {
         }
       />
 
-      <div className="mx-page my-6 grid min-h-0 flex-1 gap-6 lg:grid-cols-[15.5rem_minmax(0,1fr)]">
+      <PageBody className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[15.5rem_minmax(0,1fr)]">
         {/* Role list — soft fill + chevron, no heavy outline */}
         <aside className="h-fit rounded border border-border bg-card">
           <p className="border-b border-border px-3 py-2.5 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
@@ -299,7 +299,7 @@ function RolesPermissionsPage() {
             </p>
           ) : null}
         </div>
-      </div>
+      </PageBody>
 
       <Sheet open={createOpen} onOpenChange={setCreateOpen}>
         <SheetContent size="md">

@@ -23,13 +23,19 @@ function DrawerHost() {
     >
       {active ? (
         <SheetContent side="right" size={active.size ?? "md"}>
-          <SheetHeader>
-            <SheetTitle>{active.title}</SheetTitle>
-            {active.description ? (
-              <SheetDescription>{active.description}</SheetDescription>
-            ) : null}
-          </SheetHeader>
-          <SheetBody>{active.content}</SheetBody>
+          {active.hideHeader ? (
+            <SheetTitle className="sr-only">{active.title}</SheetTitle>
+          ) : (
+            <SheetHeader>
+              <SheetTitle>{active.title}</SheetTitle>
+              {active.description ? (
+                <SheetDescription>{active.description}</SheetDescription>
+              ) : null}
+            </SheetHeader>
+          )}
+          <SheetBody className={active.hideHeader ? "pt-4" : undefined}>
+            {active.content}
+          </SheetBody>
         </SheetContent>
       ) : null}
     </Sheet>
